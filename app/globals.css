@@ -832,3 +832,171 @@ tr.off td {
   display: grid;
   gap: 1rem;
 }
+
+/* ============================================================
+   UI polish — blueprint backdrop, depth, motion
+   Additive only; theme-aware; respects reduced motion.
+   ============================================================ */
+:root {
+  --grid-line: color-mix(in srgb, var(--rule) 42%, transparent);
+  --shadow-1: 0 1px 2px color-mix(in srgb, var(--ink) 7%, transparent);
+  --shadow-2: 0 8px 24px color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+/* faint graph-paper grid + a soft signal glow in the corner */
+body {
+  background-image:
+    radial-gradient(52rem 36rem at 100% -4%, color-mix(in srgb, var(--signal) 9%, transparent), transparent 60%),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
+  background-position: top right, center top, center top;
+  background-attachment: fixed, fixed, fixed;
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+/* rail reads as frosted glass floating over the grid */
+.rail {
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* panels lift off the paper */
+.panel,
+.day {
+  box-shadow: var(--shadow-1);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.panel.stat,
+.day {
+  will-change: transform;
+}
+.panel.stat:hover,
+.day:not(.is-today):hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+  border-color: color-mix(in srgb, var(--ink) 28%, var(--rule));
+}
+
+/* the hero gets a signal spine and a little more presence */
+.panel.today {
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-2);
+}
+.panel.today::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(var(--signal), color-mix(in srgb, var(--signal) 30%, transparent));
+}
+.today-figure .big {
+  background: linear-gradient(176deg, var(--ink), color-mix(in srgb, var(--ink) 68%, var(--steel)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* stat numbers pick up the accent on hover */
+.panel.stat .v {
+  transition: color 180ms ease;
+}
+
+/* scale + meters: a bit of gradient life, animated fill */
+.scale-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ink) 78%, var(--signal)), var(--ink));
+}
+.meter > i {
+  background-image: linear-gradient(90deg, transparent, color-mix(in srgb, #fff 18%, transparent));
+}
+
+/* buttons: press feel + glow on the signal CTA */
+.btn {
+  transition: transform 120ms ease, box-shadow 140ms ease, filter 140ms ease, background 140ms ease;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn.signal {
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--signal) 42%, transparent);
+}
+.btn.signal:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 5px 18px color-mix(in srgb, var(--signal) 55%, transparent);
+}
+
+/* nav nudges on hover */
+.nav a {
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+.nav a:hover {
+  transform: translateX(2px);
+}
+
+/* table rows + heatmap + chips respond to the pointer */
+tbody tr {
+  transition: background 120ms ease;
+}
+tbody tr:hover td {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.heat a {
+  transition: transform 100ms ease, outline-color 100ms ease;
+}
+.heat a:hover {
+  transform: scale(1.35);
+  outline: 2px solid var(--ink);
+  position: relative;
+  z-index: 1;
+}
+.chip {
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+/* staggered entrance for the main column */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .main > * {
+    animation: rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .main > *:nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .main > *:nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .main > *:nth-child(4) {
+    animation-delay: 210ms;
+  }
+  .main > *:nth-child(5) {
+    animation-delay: 280ms;
+  }
+  .main > *:nth-child(n + 6) {
+    animation-delay: 340ms;
+  }
+  @keyframes grow-w {
+    from {
+      width: 0;
+    }
+  }
+  .meter > i,
+  .scale-fill {
+    animation: grow-w 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
